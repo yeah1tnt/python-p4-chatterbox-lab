@@ -5,7 +5,7 @@ from flask_migrate import Migrate
 from models import db, Message
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///server/instance/app.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.json.compact = False
 
@@ -38,16 +38,12 @@ def messages():
         return response
     
 
-@app.route('/messages/<int:id>', methods=['GET','PATCH','DELETE'])
+@app.route('/messages/<int:id>', methods=['PATCH','DELETE'])
 def messages_by_id(id):
     message = Message.query.filter_by(id=id).first()
-    if request.method == 'GET':
-        message_serialized = message.to_dict()
 
-        response = make_response(jsonify(message_serialized),200)
-        return response
-    elif request.method == 'PATCH':
-        message = Message.query.filter_by(id=id).first()
+    if request.method == 'PATCH':
+
         message.body = request.get_json().get('body')
 
         db.session.add(message)
@@ -56,7 +52,7 @@ def messages_by_id(id):
         response = make_response(jsonify(message_serialized),200)
         return response
     elif request.method == 'DELETE':
-        message = Message.query.filter_by(id=id).first()
+
         db.session.delete(message)
         db.session.commit()
         response = make_response('',200)
